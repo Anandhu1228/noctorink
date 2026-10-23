@@ -115,8 +115,17 @@ label {
 }
 
 .icon-btn.live {
+  width: auto;
+  min-width: var(--btn);
+  padding: 0 8px;
+  gap: 4px;
   background: var(--live);
-  color: #ff6b63;
+  color: #ffb4ae;
+}
+
+#mode .esc {
+  font: 700 11px/1 "Segoe UI", sans-serif;
+  color: #ffffff;
 }
 
 .icon-btn.danger:hover {

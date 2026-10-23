@@ -54,14 +54,19 @@ Number keys `1`–`9` pick the first nine swatches while draw mode is active and
 
 Edit accelerators in `src/main/config.js`, then restart. That file is the only shortcut list.
 
+While you are drawing, **Escape** releases the screen and keeps the ink. It is not active in pass-through, so other apps still receive Escape. The red **Esc** button on the toolbar does the same thing. A pen tap on the toolbar counts as a click even when draw mode has focus.
+
+The big arrow is off when NoctorInk starts. The normal cursor stays. Click the arrow button (or press `Ctrl+Alt+P`) to show it, and click again to hide it.
+
 | Action | Default |
 | --- | --- |
+| Release the screen (draw mode only) | `Escape` |
 | Draw / pass-through | `Ctrl+Alt+D` |
 | Clear | `Ctrl+Alt+C` |
 | Undo | `Ctrl+Alt+Z` |
 | Redo | `Ctrl+Alt+Y` |
 | Hide / show toolbar | `Ctrl+Alt+H` |
-| Giant pointer | `Ctrl+Alt+P` |
+| Big arrow on / off | `Ctrl+Alt+P` |
 | Quit | `Ctrl+Alt+Q` |
 
 The tray icon menu can switch mode, hide or show the toolbar, clear, and quit.

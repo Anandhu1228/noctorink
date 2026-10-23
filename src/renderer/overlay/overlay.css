@@ -35,16 +35,12 @@ canvas {
 
 #preview {
   z-index: 2;
-  cursor: crosshair;
+  cursor: default;
 }
 
 #pointer {
   z-index: 3;
   pointer-events: none;
-}
-
-body.hide-cursor #preview {
-  cursor: none;
 }
 
 #text-editor {

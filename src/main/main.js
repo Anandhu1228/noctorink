@@ -46,6 +46,7 @@ function snapshot() {
     dock: state.dock,
     collapsed: state.collapsed,
     toolbarVisible: state.toolbarVisible,
+    toolbarBounds: windows.currentToolbarBounds(),
     display: state.display,
     presets: config.PRESET_COLORS.slice(),
     hotkeys: config.HOTKEYS,
@@ -158,6 +159,13 @@ function setMode(mode) {
   if (mode !== 'draw' && mode !== 'passthrough') return;
   state.mode = mode;
   windows.applyInputMode(mode);
+  // Escape is the panic button, and only while the screen is captured.
+  shortcuts.setDrawRelease(mode === 'draw', config.HOTKEYS.release || 'Escape', () => {
+    // Unregister after this callback returns. Doing it inline can drop the key event.
+    setImmediate(() => {
+      if (state && state.mode === 'draw') setMode('passthrough');
+    });
+  });
   console.log(`[noctorink] ${mode === 'draw' ? 'draw mode' : 'pass-through mode'}`);
   broadcast();
 }
@@ -247,6 +255,23 @@ function registerIpc() {
   ipcMain.on('state:toggle-mode', (event) => {
     if (!isFrom(windows.getToolbar(), event)) return;
     actions.toggleDraw();
+  });
+
+  ipcMain.on('state:release', (event) => {
+    if (!isFrom(windows.getOverlay(), event)) return;
+    setMode('passthrough');
+  });
+
+  // The pen can hit the overlay even when the tip is visually over the toolbar,
+  // because Weylus delivers events to the focused window. Replay that tap on the bar.
+  ipcMain.on('toolbar:pen-click', (event, point) => {
+    if (!isFrom(windows.getOverlay(), event)) return;
+    if (!point || !Number.isFinite(Number(point.x)) || !Number.isFinite(Number(point.y))) return;
+    windows.raiseToolbar();
+    windows.send(windows.getToolbar(), 'toolbar:pen-click', {
+      x: Number(point.x),
+      y: Number(point.y),
+    });
   });
 
   ipcMain.on('state:set-tool', (event, tool) => {
@@ -508,6 +533,7 @@ if (gotLock) {
   app.on('will-quit', () => {
     quitting = true;
     stopCursorPoll();
+    windows.stopToolbarRaise();
     shortcuts.unregisterHotkeys();
     tray.destroyTray();
   });

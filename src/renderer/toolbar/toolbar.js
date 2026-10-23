@@ -85,8 +85,8 @@
   function svgDraw() {
     return svgWrap('<path d="M4 18l3.5-.8L18 6.7 15.3 4 4.8 14.5 4 18z"/>');
   }
-  function svgPass() {
-    return svgWrap('<path d="M5 5l6 14 1.8-5.2L18 12 5 5z"/><path d="M14 15l5 4"/>');
+  function svgRelease() {
+    return svgWrap('<path d="M9 6H6v12h3"/><path d="M10 12h8"/><path d="M15 9l3 3-3 3"/>');
   }
   function svgPointer() {
     return svgWrap('<path d="M6 4l1.2 12 3-2.2 2.4 5.2 2.2-1-2.4-5.2H18L6 4z" fill="currentColor" stroke="none"/>');
@@ -243,12 +243,12 @@
     const drawing = state.mode === 'draw';
     const mode = document.getElementById('mode');
     mode.classList.toggle('live', drawing);
-    mode.innerHTML = drawing ? svgPass() : svgDraw();
-    mode.title = drawing ? `Pass-through${hotkey('toggleDraw')}` : `Draw${hotkey('toggleDraw')}`;
+    mode.innerHTML = drawing ? `${svgRelease()}<span class="esc">Esc</span>` : svgDraw();
+    mode.title = drawing ? `Release screen (Esc)` : `Draw${hotkey('toggleDraw')}`;
 
     const pointer = document.getElementById('pointer');
     pointer.classList.toggle('active', state.pointerArrow);
-    pointer.title = `Giant pointer${hotkey('togglePointer')}`;
+    pointer.title = state.pointerArrow ? `Hide big arrow${hotkey('togglePointer')}` : `Show big arrow${hotkey('togglePointer')}`;
 
     const monitor = document.getElementById('monitor');
     if (state.display) {
@@ -275,6 +275,13 @@
       api.resize(width, height);
     });
   }
+
+  api.onPenClick((point) => {
+    if (!point) return;
+    const el = document.elementFromPoint(point.x, point.y);
+    const control = el && el.closest ? el.closest('button, input, label') : null;
+    if (control && typeof control.click === 'function') control.click();
+  });
 
   window.addEventListener('contextmenu', (event) => event.preventDefault());
   window.addEventListener('keydown', (event) => {

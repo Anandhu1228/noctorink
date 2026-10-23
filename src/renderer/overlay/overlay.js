@@ -399,11 +399,32 @@
     redraw();
   }
 
+  /** Screen point of this event in the same DIP space as the toolbar window. */
+  function toolbarHit(event) {
+    const box = state && state.toolbarBounds;
+    const origin = state && state.display && state.display.bounds;
+    if (!box || !origin || state.toolbarVisible === false) return null;
+    const x = origin.x + event.clientX;
+    const y = origin.y + event.clientY;
+    const pad = 8;
+    if (x < box.x - pad || y < box.y - pad || x >= box.x + box.width + pad || y >= box.y + box.height + pad) {
+      return null;
+    }
+    return { x: x - box.x, y: y - box.y };
+  }
+
   function onPointerDown(event) {
     if (!state || state.mode !== 'draw') return;
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     if (activePointerId !== null) return;
     if (textSession && event.target === textEditor) return;
+
+    const barHit = toolbarHit(event);
+    if (barHit) {
+      event.preventDefault();
+      api.toolbarClick(barHit.x, barHit.y);
+      return;
+    }
 
     event.preventDefault();
     if (!loggedPointerType) {
@@ -454,7 +475,6 @@
   function applyState(next) {
     const previousMode = state && state.mode;
     state = next;
-    document.body.classList.toggle('hide-cursor', Boolean(state.pointerArrow && state.mode === 'draw'));
     if (previousMode === 'draw' && state.mode !== 'draw') {
       if (textSession) commitText();
       else if (gesture) finishGesture();
@@ -514,13 +534,15 @@
 
   window.addEventListener('keydown', (event) => {
     if (event.key === 'Shift') shiftKey = true;
-    if (event.target === textEditor) {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        commitText();
-      }
+    // Backup for when the global Escape shortcut did not register.
+    // Leaving draw mode also commits an open text box.
+    if (event.key === 'Escape' && state && state.mode === 'draw') {
+      event.preventDefault();
+      if (textSession) commitText();
+      api.release();
       return;
     }
+    if (event.target === textEditor) return;
     if (!state || state.mode !== 'draw') return;
     if (event.ctrlKey || event.altKey || event.metaKey) return;
     if (/^[1-9]$/.test(event.key)) api.setColorIndex(Number(event.key) - 1);

@@ -15,6 +15,9 @@ const path = require('path');
 
 const HOTKEYS = {
   toggleDraw: 'Ctrl+Alt+D',
+  // Active only while drawing, so Escape still works in other apps during pass-through.
+  // One press leaves draw mode and commits any open text box.
+  release: 'Escape',
   clear: 'Ctrl+Alt+C',
   undo: 'Ctrl+Alt+Z',
   redo: 'Ctrl+Alt+Y',
@@ -110,7 +113,9 @@ function sanitize(raw) {
   if (color) next.color = color;
   next.size = clampSize(raw.size);
   next.fill = Boolean(raw.fill);
-  next.pointerArrow = Boolean(raw.pointerArrow);
+  // The big arrow is session-only. It starts off every launch and appears
+  // only after the pointer button is clicked.
+  next.pointerArrow = false;
   if (Number.isFinite(Number(raw.pointerScale)) && Number(raw.pointerScale) > 0) {
     next.pointerScale = Math.min(4, Math.max(0.4, Number(raw.pointerScale)));
   } else {

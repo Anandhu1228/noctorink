@@ -23,6 +23,8 @@ contextBridge.exposeInMainWorld('overlayApi', {
     return () => ipcRenderer.removeListener('cursor:move', listener);
   },
   reportHistory: (info) => ipcRenderer.send('history:report', info),
+  release: () => ipcRenderer.send('state:release'),
+  toolbarClick: (x, y) => ipcRenderer.send('toolbar:pen-click', { x, y }),
   setColorIndex: (index) => ipcRenderer.send('state:set-color-index', index),
   savePng: (dataUrl) => ipcRenderer.send('screenshot:png', dataUrl),
 });

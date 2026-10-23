@@ -28,4 +28,9 @@ contextBridge.exposeInMainWorld('toolbarApi', {
   screenshot: () => ipcRenderer.send('screenshot:request'),
   resize: (width, height) => ipcRenderer.send('toolbar:resize', { width, height }),
   quit: () => ipcRenderer.send('app:quit'),
+  onPenClick: (callback) => {
+    const listener = (_event, point) => callback(point);
+    ipcRenderer.on('toolbar:pen-click', listener);
+    return () => ipcRenderer.removeListener('toolbar:pen-click', listener);
+  },
 });

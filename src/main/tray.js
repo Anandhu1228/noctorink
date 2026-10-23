@@ -28,7 +28,7 @@ function refresh(getSnapshot, actions) {
   const drawing = snapshot.mode === 'draw';
   const menu = Menu.buildFromTemplate([
     {
-      label: drawing ? 'Switch to pass-through' : 'Switch to draw',
+      label: drawing ? 'Release screen' : 'Switch to draw',
       click: () => actions.toggleDraw(),
     },
     {

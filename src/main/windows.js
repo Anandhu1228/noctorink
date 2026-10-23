@@ -21,6 +21,7 @@ let overlay = null;
 let toolbar = null;
 let onToolbarMove = null;
 let toolbarShown = false;
+let raiseTimer = null;
 
 function webPreferences(preload) {
   return {
@@ -101,6 +102,7 @@ function createOverlay() {
   overlay.setAlwaysOnTop(true, 'screen-saver', 1);
   overlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   overlay.setIgnoreMouseEvents(true, { forward: true });
+  overlay.on('focus', () => raiseToolbar());
   attachConsole(overlay, 'overlay');
   lockZoom(overlay);
   overlay.loadFile(OVERLAY_HTML);
@@ -153,10 +155,29 @@ function createToolbar(moveHandler) {
   return toolbar;
 }
 
+function raiseToolbar() {
+  if (!toolbar || toolbar.isDestroyed() || !toolbar.isVisible()) return;
+  // Focusing the overlay pulls it above other topmost windows on Windows.
+  // Put the toolbar back in front so the pen and mouse can still hit it.
+  toolbar.setAlwaysOnTop(true, 'screen-saver', 2);
+  toolbar.moveTop();
+}
+
 function raiseWindows() {
   if (overlay && !overlay.isDestroyed()) overlay.setAlwaysOnTop(true, 'screen-saver', 1);
-  if (toolbar && !toolbar.isDestroyed() && toolbar.isVisible()) {
-    toolbar.setAlwaysOnTop(true, 'screen-saver', 2);
+  raiseToolbar();
+}
+
+function startToolbarRaise() {
+  stopToolbarRaise();
+  raiseToolbar();
+  raiseTimer = setInterval(raiseToolbar, 400);
+}
+
+function stopToolbarRaise() {
+  if (raiseTimer) {
+    clearInterval(raiseTimer);
+    raiseTimer = null;
   }
 }
 
@@ -172,7 +193,9 @@ function applyInputMode(mode) {
     overlay.setIgnoreMouseEvents(false);
     overlay.show();
     overlay.focus();
+    startToolbarRaise();
   } else {
+    stopToolbarRaise();
     overlay.setIgnoreMouseEvents(true, { forward: true });
     overlay.setFocusable(false);
     if (overlay.isFocused()) overlay.blur();
@@ -278,6 +301,8 @@ module.exports = {
   createOverlay,
   createToolbar,
   applyInputMode,
+  raiseToolbar,
+  stopToolbarRaise,
   placeOverlayOn,
   layoutToolbar,
   setToolbarVisible,
