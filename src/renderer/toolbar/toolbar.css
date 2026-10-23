@@ -220,18 +220,17 @@ label {
   width: 28px;
 }
 
-/* Left and right docks stand the bar up. Columns wrap so a tall stack
-   still fits the screen; the script sets an explicit width and height. */
+/* Left and right docks are one column. If the stack is taller than the
+   screen, the script scales the whole strip down so it stays one column. */
 body.vertical .bar {
   flex-direction: column;
   flex-wrap: nowrap;
-  align-content: flex-start;
   align-items: center;
   justify-content: flex-start;
   width: max-content;
   height: max-content;
-  padding: 4px;
-  gap: 2px;
+  padding: 3px;
+  gap: 1px;
 }
 
 body.vertical #tools,
@@ -272,14 +271,14 @@ body.vertical #mode.live {
 
 body.vertical .slider {
   width: var(--btn);
-  height: 88px;
+  height: 64px;
   flex: 0 0 auto;
   padding: 0;
 }
 
 body.vertical .slider input[type='range'] {
-  width: 16px;
-  height: 72px;
+  width: 14px;
+  height: 52px;
   margin: 0;
   writing-mode: vertical-lr;
   direction: rtl;

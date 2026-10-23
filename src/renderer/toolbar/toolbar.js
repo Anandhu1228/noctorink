@@ -285,6 +285,7 @@
     bar.style.flexWrap = '';
     bar.style.width = '';
     bar.style.height = '';
+    bar.style.zoom = '';
   }
 
   function dockLimit() {
@@ -293,49 +294,14 @@
     return Math.max(220, Math.floor(height - 24));
   }
 
-  function axisOverflow() {
-    return {
-      x: bar.scrollWidth - bar.clientWidth,
-      y: bar.scrollHeight - bar.clientHeight,
-    };
-  }
-
-  // A single column is used when it fits. Otherwise the stack wraps, then
-  // the strip grows until the last button (close) is inside the window.
+  // One column only. Scale the whole strip so it stays inside the work area
+  // instead of wrapping into a second column.
   function fitVertical() {
     resetBarBox();
     const max = dockLimit();
-    const natural = bar.offsetHeight;
-    if (natural <= max) return;
-
-    const style = getComputedStyle(bar);
-    const padX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-    const inner = Math.max(36, bar.clientWidth - padX);
-    const gap = 2;
-    let cols = Math.max(2, Math.ceil(natural / max));
-    bar.style.flexWrap = 'wrap';
-    for (let attempt = 0; attempt < 4; attempt++) {
-      let width = Math.ceil(padX + inner * cols + gap * (cols - 1));
-      let height = Math.min(max, Math.ceil(natural / cols));
-      for (let grow = 0; grow < 12; grow++) {
-        bar.style.width = `${width}px`;
-        bar.style.height = `${height}px`;
-        const extra = axisOverflow();
-        if (extra.x <= 1 && extra.y <= 1) return;
-        // A short strip wraps the last buttons into a clipped extra column.
-        // Give those buttons a row in the columns that are already visible.
-        if (height < max && (extra.y > 1 || extra.x > 1)) {
-          height = Math.min(max, height + Math.max(40, extra.y));
-          continue;
-        }
-        if (extra.x > 1) {
-          width += extra.x;
-          continue;
-        }
-        break;
-      }
-      cols += 1;
-    }
+    const natural = bar.getBoundingClientRect().height;
+    if (natural <= max || natural < 1) return;
+    bar.style.zoom = String(Math.min(1, max / natural));
   }
 
   function scheduleMeasure() {
