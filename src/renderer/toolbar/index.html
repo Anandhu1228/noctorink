@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:;">
+  <title>NoctorInk</title>
+  <link rel="stylesheet" href="toolbar.css">
+</head>
+<body>
+  <div id="bar" class="bar">
+    <button id="expand" class="icon-btn handle" type="button" title="Expand toolbar"></button>
+    <div id="grip" class="grip" title="Drag"></div>
+    <div class="group" id="tools"></div>
+    <span class="sep group"></span>
+    <button id="color-btn" class="icon-btn group" type="button" title="Colors"></button>
+    <div id="swatches" class="swatches group" hidden></div>
+    <label class="slider group" title="Pen size">
+      <input id="size" type="range" min="1" max="40" step="1" value="6">
+    </label>
+    <button id="fill" class="icon-btn group" type="button" title="Fill shapes"></button>
+    <span class="sep group"></span>
+    <div class="group" id="history"></div>
+    <span class="sep group"></span>
+    <div class="group" id="session"></div>
+  </div>
+  <script src="toolbar.js"></script>
+</body>
+</html>

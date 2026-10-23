@@ -1,0 +1,32 @@
+# Packaging only. Do not expect a display server: the overlay runs on Windows.
+#   docker compose run --rm build
+# Installers are written to ./dist on the host.
+
+services:
+  build:
+    image: electronuserland/builder:wine
+    working_dir: /project
+    volumes:
+      - .:/project
+      - noctorink_node_modules:/project/node_modules
+      - noctorink_electron_cache:/root/.cache/electron
+      - noctorink_electron_builder_cache:/root/.cache/electron-builder
+    environment:
+      ELECTRON_CACHE: /root/.cache/electron
+      ELECTRON_BUILDER_CACHE: /root/.cache/electron-builder
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    command: bash -lc "npm ci && node scripts/generate-icons.js && npx electron-builder --win --publish never"
+
+  lint:
+    image: node:22-bookworm
+    working_dir: /project
+    volumes:
+      - .:/project
+      - noctorink_lint_modules:/project/node_modules
+    command: bash -lc "npm ci && npm run lint && npm test"
+
+volumes:
+  noctorink_node_modules:
+  noctorink_lint_modules:
+  noctorink_electron_cache:
+  noctorink_electron_builder_cache:

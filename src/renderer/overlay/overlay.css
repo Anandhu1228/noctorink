@@ -1,0 +1,71 @@
+/* The page background is a 1/255 veil so Windows hit-tests the layered window.
+   Fully transparent pixels are click-through even when setIgnoreMouseEvents is off.
+   The ink canvas itself stays clear so PNG export has a transparent background. */
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* 1/255 alpha. Windows will not deliver clicks to a fully transparent pixel. */
+  background: rgba(0, 0, 0, 0.004);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  background: transparent;
+}
+
+#hit {
+  z-index: 0;
+  pointer-events: none;
+}
+
+#ink {
+  z-index: 1;
+  pointer-events: none;
+}
+
+#preview {
+  z-index: 2;
+  cursor: crosshair;
+}
+
+#pointer {
+  z-index: 3;
+  pointer-events: none;
+}
+
+body.hide-cursor #preview {
+  cursor: none;
+}
+
+#text-editor {
+  display: none;
+  position: fixed;
+  z-index: 4;
+  margin: 0;
+  padding: 2px 4px;
+  border: none;
+  outline: 1px dashed currentColor;
+  outline-offset: 3px;
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  white-space: pre;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+  font-family: "Segoe UI", sans-serif;
+}
+
+#text-editor.visible {
+  display: block;
+}

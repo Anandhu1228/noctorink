@@ -1,0 +1,212 @@
+:root {
+  color-scheme: dark;
+  --bar-h: 46px;
+  --btn: 38px;
+  --bg: rgba(18, 20, 24, 0.96);
+  --fg: #e8eaed;
+  --muted: #9aa0a6;
+  --line: rgba(255, 255, 255, 0.1);
+  --active: #314056;
+  --live: #3a2022;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: max-content;
+  height: var(--bar-h);
+  padding: 0 4px;
+  gap: 2px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--fg);
+}
+
+.group,
+.sep,
+.slider,
+.swatches,
+.grip {
+  display: flex;
+  align-items: center;
+}
+
+body.collapsed .group,
+body.collapsed .grip {
+  display: none;
+}
+
+body:not(.collapsed) #expand {
+  display: none;
+}
+
+.grip {
+  width: 14px;
+  height: var(--btn);
+  margin: 0 2px;
+  -webkit-app-region: drag;
+  cursor: grab;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.45) 1px, transparent 1.2px);
+  background-size: 4px 4px;
+  background-position: center;
+}
+
+.sep {
+  width: 1px;
+  height: 22px;
+  margin: 0 3px;
+  background: var(--line);
+}
+
+button,
+input,
+label {
+  -webkit-app-region: no-drag;
+}
+
+.icon-btn {
+  width: var(--btn);
+  height: var(--btn);
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.icon-btn svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  pointer-events: none;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.icon-btn.active {
+  background: var(--active);
+}
+
+.icon-btn.live {
+  background: var(--live);
+  color: #ff6b63;
+}
+
+.icon-btn.danger:hover {
+  background: rgba(255, 80, 70, 0.18);
+}
+
+#color-btn .swatch-dot,
+.swatches button {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 0;
+}
+
+.swatches {
+  gap: 3px;
+  padding: 0 2px;
+}
+
+.swatches[hidden] {
+  display: none !important;
+}
+
+.swatches button {
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.swatches button.active {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+}
+
+.swatches input[type='color'] {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.swatches input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.swatches input[type='color']::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.slider input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 88px;
+  height: 4px;
+  margin: 0 6px;
+  border-radius: 999px;
+  background: #3c424c;
+  cursor: pointer;
+}
+
+.slider input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: #e8eaed;
+}
+
+#tool-numbers {
+  position: relative;
+}
+
+#next-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 11px/1 "Segoe UI", sans-serif;
+  pointer-events: none;
+}
+
+.handle {
+  width: 28px;
+}

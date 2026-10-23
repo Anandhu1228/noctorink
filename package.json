@@ -1,0 +1,22 @@
+{
+  "name": "noctorink",
+  "productName": "NoctorInk",
+  "version": "1.0.0",
+  "description": "Screen annotation overlay for teaching and recording. Pen input is handled with web Pointer Events so Weylus strokes stay smooth.",
+  "main": "src/main/main.js",
+  "author": "NoctorInk",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "icons": "node scripts/generate-icons.js",
+    "prestart": "node scripts/generate-icons.js",
+    "start": "electron .",
+    "lint": "node scripts/lint.js",
+    "test": "node tests/geometry.test.js && node tests/history.test.js",
+    "dist": "node scripts/generate-icons.js && electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "45.0.0",
+    "electron-builder": "26.15.3"
+  }
+}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:;">
+  <title>NoctorInk Overlay</title>
+  <link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+  <canvas id="hit"></canvas>
+  <canvas id="ink"></canvas>
+  <canvas id="preview"></canvas>
+  <canvas id="pointer"></canvas>
+  <textarea id="text-editor" spellcheck="false" autocomplete="off" wrap="off" aria-label="Annotation text"></textarea>
+  <script src="geometry.js"></script>
+  <script src="history.js"></script>
+  <script src="render.js"></script>
+  <script src="tools/freehand.js"></script>
+  <script src="tools/shapes.js"></script>
+  <script src="tools/eraser.js"></script>
+  <script src="tools/text.js"></script>
+  <script src="tools/numbers.js"></script>
+  <script src="tools/pointerArrow.js"></script>
+  <script src="overlay.js"></script>
+</body>
+</html>
