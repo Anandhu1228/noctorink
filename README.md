@@ -30,7 +30,7 @@ The overlay covers the monitor under the cursor at launch. The monitor button mo
 
 ## Toolbar
 
-One horizontal row, about 46px tall, parked on an edge (top by default). Drag the dotted grip to move it. The dock button cycles top, right, bottom, and left. Collapse shrinks it to a small handle. Position is remembered.
+The toolbar is a horizontal row on the top or bottom, and a vertical strip on the left or right. It starts on the top. The dock button cycles top, right, bottom, left. Drag the dotted grip to the left or right end and it stands up on that edge; drag it to the top or bottom and it lies flat again. Collapse shrinks it to a small handle. Position is remembered.
 
 The color button opens a single row of swatches plus a custom color picker in that same row. There is no second palette. The size slider (1–40) sets pen width, shape outline width, arrow thickness, highlighter width, text size, number size, and the giant pointer size.
 

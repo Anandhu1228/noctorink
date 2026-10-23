@@ -219,3 +219,68 @@ label {
 .handle {
   width: 28px;
 }
+
+/* Left and right docks stand the bar up. Columns wrap so a tall stack
+   still fits the screen; the script sets an explicit width and height. */
+body.vertical .bar {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-content: flex-start;
+  align-items: center;
+  justify-content: flex-start;
+  width: max-content;
+  height: max-content;
+  padding: 4px;
+  gap: 2px;
+}
+
+body.vertical #tools,
+body.vertical #history,
+body.vertical #session,
+body.vertical #swatches {
+  display: contents;
+}
+
+body.vertical .grip {
+  width: 36px;
+  height: 12px;
+  margin: 2px 0;
+}
+
+body.vertical .sep {
+  width: 22px;
+  height: 1px;
+  margin: 3px 0;
+}
+
+body.vertical .icon-btn,
+body.vertical .icon-btn.live {
+  width: var(--btn);
+  min-width: 0;
+  height: var(--btn);
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+body.vertical #mode.live {
+  height: auto;
+  min-height: var(--btn);
+  flex-direction: column;
+  padding: 3px 0;
+  gap: 1px;
+}
+
+body.vertical .slider {
+  width: var(--btn);
+  height: 88px;
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+body.vertical .slider input[type='range'] {
+  width: 16px;
+  height: 72px;
+  margin: 0;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}

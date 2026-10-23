@@ -155,6 +155,50 @@ function layoutToolbarFromRenderer(width, height) {
   }, 200);
 }
 
+function isVerticalDock(dock) {
+  return dock === 'left' || dock === 'right';
+}
+
+// Which edge a dropped toolbar should snap to. A bar already on the top or
+// bottom becomes vertical once its left or right side is pushed to that end.
+// A nearly full-width bar is not treated as touching both sides at once.
+function pickDockEdge(bounds, area, current) {
+  const gap = {
+    left: bounds.x - area.x,
+    right: area.x + area.width - (bounds.x + bounds.width),
+    top: bounds.y - area.y,
+    bottom: area.y + area.height - (bounds.y + bounds.height),
+  };
+  const SNAP = 56;
+  let names = ['left', 'right', 'top', 'bottom'];
+  // A long bar is close to both ends of its own axis. That is its length, not a dock request.
+  if (gap.left <= SNAP && gap.right <= SNAP) names = names.filter((name) => name !== 'left' && name !== 'right');
+  if (gap.top <= SNAP && gap.bottom <= SNAP) names = names.filter((name) => name !== 'top' && name !== 'bottom');
+  const hits = names.filter((name) => name !== current && gap[name] <= SNAP);
+  hits.sort((a, b) => gap[a] - gap[b]);
+  return hits.length ? hits[0] : null;
+}
+
+function applyDock(next) {
+  if (!config.DOCKS.includes(next)) return;
+  const wasVertical = isVerticalDock(state.dock);
+  state.dock = next;
+  state.toolbarCustom = false;
+  const nowVertical = isVerticalDock(next);
+  const area = displayById(state.display && state.display.id).workArea;
+  if (wasVertical !== nowVertical) {
+    // The renderer measures the real strip on the next frame. This size only
+    // parks the window on the new edge until that measurement arrives.
+    if (nowVertical) layoutToolbarFromRenderer(96, Math.min(area.height - 24, 640));
+    else layoutToolbarFromRenderer(720, 48);
+  } else {
+    layoutToolbarFromRenderer(state.toolbarWidth, state.toolbarHeight);
+  }
+  console.log(`[noctorink] toolbar docked ${next}`);
+  persistSoon();
+  broadcast();
+}
+
 function setMode(mode) {
   if (mode !== 'draw' && mode !== 'passthrough') return;
   state.mode = mode;
@@ -349,11 +393,7 @@ function registerIpc() {
   ipcMain.on('toolbar:cycle-dock', (event) => {
     if (!isFrom(windows.getToolbar(), event)) return;
     const index = config.DOCKS.indexOf(state.dock);
-    state.dock = config.DOCKS[(index + 1) % config.DOCKS.length];
-    state.toolbarCustom = false;
-    layoutToolbarFromRenderer(state.toolbarWidth, state.toolbarHeight);
-    persistSoon();
-    broadcast();
+    applyDock(config.DOCKS[(index + 1) % config.DOCKS.length]);
   });
 
   ipcMain.on('toolbar:toggle-collapse', (event) => {
@@ -369,9 +409,10 @@ function registerIpc() {
     const width = Number(payload.width);
     const height = Number(payload.height);
     if (!Number.isFinite(width) || !Number.isFinite(height)) return;
-    if (width < 20 || height < 20 || width > 4000 || height > 800) return;
+    if (width < 20 || height < 20 || width > 4096 || height > 4096) return;
     layoutToolbarFromRenderer(width, height);
     persistSoon();
+    broadcast();
   });
 
   ipcMain.on('monitor:cycle', (event) => {
@@ -470,6 +511,12 @@ function boot() {
     state.savedToolbarX = bounds.x;
     state.savedToolbarY = bounds.y;
     persistSoon();
+  }, (bounds) => {
+    if (suppressToolbarMove || !state || !bounds) return;
+    const display = displayById(state.display && state.display.id);
+    const next = pickDockEdge(bounds, display.workArea, state.dock);
+    if (!next || next === state.dock) return;
+    applyDock(next);
   });
 
   const startDisplay = displayById(saved.displayId);

@@ -20,6 +20,7 @@ const ICON = path.join(__dirname, '../../assets/icon.png');
 let overlay = null;
 let toolbar = null;
 let onToolbarMove = null;
+let onToolbarDrop = null;
 let toolbarShown = false;
 let raiseTimer = null;
 
@@ -114,8 +115,9 @@ function createOverlay() {
   return overlay;
 }
 
-function createToolbar(moveHandler) {
+function createToolbar(moveHandler, dropHandler) {
   onToolbarMove = moveHandler;
+  onToolbarDrop = dropHandler;
   const display = screen.getPrimaryDisplay();
   const width = 960;
   const height = 48;
@@ -146,11 +148,16 @@ function createToolbar(moveHandler) {
   // Above the overlay (relative level 2 > 1) so the bar stays clickable in draw mode.
   toolbar.setAlwaysOnTop(true, 'screen-saver', 2);
   toolbar.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  toolbar.setMinimumSize(32, 32);
   attachConsole(toolbar, 'toolbar');
   lockZoom(toolbar);
   toolbar.loadFile(TOOLBAR_HTML);
   toolbar.on('move', () => {
     if (typeof onToolbarMove === 'function' && toolbarShown) onToolbarMove(toolbar.getBounds());
+  });
+  // 'moved' fires once when a drag ends. 'move' fires for the whole drag.
+  toolbar.on('moved', () => {
+    if (typeof onToolbarDrop === 'function' && toolbarShown) onToolbarDrop(toolbar.getBounds());
   });
   return toolbar;
 }
@@ -226,9 +233,11 @@ function currentToolbarBounds() {
  */
 function layoutToolbar({ width, height, dock, custom, display }) {
   if (!toolbar || toolbar.isDestroyed()) return;
-  const w = Math.max(28, Math.ceil(width));
-  const h = Math.max(28, Math.ceil(height));
   const area = display ? display.workArea : screen.getPrimaryDisplay().workArea;
+  const maxW = Math.max(32, area.width - 16);
+  const maxH = Math.max(32, area.height - 16);
+  const w = Math.min(maxW, Math.max(32, Math.ceil(width)));
+  const h = Math.min(maxH, Math.max(32, Math.ceil(height)));
   const current = toolbar.getBounds();
   let x = current.x;
   let y = current.y;

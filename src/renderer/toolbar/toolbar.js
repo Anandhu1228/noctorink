@@ -1,7 +1,7 @@
 /**
- * Single-row toolbar. It is its own window so it stays clickable while the
- * overlay is in pass-through. Popovers are not used: the color choices are
- * one extra run of circles in this same row.
+ * Toolbar window. Horizontal on the top and bottom edges, vertical on the
+ * left and right. It stays clickable while the overlay is in pass-through.
+ * Popovers are not used: the color choices sit in the same strip.
  */
 
 (function () {
@@ -32,6 +32,7 @@
   let state = null;
   let swatchesOpen = false;
   let lastSent = '';
+  let layoutKey = '';
 
   function svgWrap(body) {
     return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
@@ -94,7 +95,10 @@
   function svgMonitor() {
     return svgWrap('<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M9 20h6M12 16v4"/>');
   }
-  function svgDock() {
+  function svgDock(dock) {
+    if (dock === 'bottom') return svgWrap('<rect x="4" y="5" width="16" height="14" rx="1.5"/><path d="M4 15h16"/>');
+    if (dock === 'left') return svgWrap('<rect x="4" y="5" width="16" height="14" rx="1.5"/><path d="M8 5v14"/>');
+    if (dock === 'right') return svgWrap('<rect x="4" y="5" width="16" height="14" rx="1.5"/><path d="M16 5v14"/>');
     return svgWrap('<rect x="4" y="5" width="16" height="14" rx="1.5"/><path d="M4 9h16"/>');
   }
   function svgCollapse() {
@@ -153,7 +157,7 @@
     const mode = makeButton('mode', 'Draw / pass-through', svgDraw());
     const pointer = makeButton('pointer', 'Giant pointer arrow', svgPointer());
     const monitor = makeButton('monitor', 'Monitor', svgMonitor());
-    const dock = makeButton('dock', 'Dock toolbar', svgDock());
+    const dock = makeButton('dock', 'Dock toolbar', svgDock('top'));
     const collapse = makeButton('collapse', 'Collapse toolbar', svgCollapse());
     const close = makeButton('close', 'Quit', svgClose(), 'icon-btn danger');
     mode.addEventListener('click', () => api.toggleMode());
@@ -201,7 +205,9 @@
 
   function render() {
     if (!state) return;
+    const vertical = !state.collapsed && (state.dock === 'left' || state.dock === 'right');
     document.body.classList.toggle('collapsed', state.collapsed);
+    document.body.classList.toggle('vertical', vertical);
     ensureSwatches();
     swatchesEl.hidden = !swatchesOpen || state.collapsed;
 
@@ -256,16 +262,86 @@
     }
 
     const dock = document.getElementById('dock');
-    dock.title = `Docked ${state.dock}. Click for the next edge.`;
+    const upright = state.dock === 'left' || state.dock === 'right';
+    dock.innerHTML = svgDock(state.dock);
+    dock.title = upright
+      ? `Vertical, ${state.dock} edge. Click for the next edge, or drag the grip.`
+      : `Horizontal, ${state.dock} edge. Click for the next edge, or drag the grip to a side.`;
+    document.getElementById('grip').title = 'Drag onto the left or right edge for a vertical bar';
     document.getElementById('collapse').title = 'Collapse';
     document.getElementById('close').title = `Quit${hotkey('quit')}`;
     expandBtn.title = 'Expand toolbar';
 
+    const work = state.display && state.display.workArea ? state.display.workArea.height : 0;
+    const key = `${state.dock}:${state.collapsed ? 1 : 0}:${swatchesOpen ? 1 : 0}:${state.mode}:${work}`;
+    if (key !== layoutKey) {
+      layoutKey = key;
+      lastSent = '';
+    }
     scheduleMeasure();
+  }
+
+  function resetBarBox() {
+    bar.style.flexWrap = '';
+    bar.style.width = '';
+    bar.style.height = '';
+  }
+
+  function dockLimit() {
+    const work = state && state.display && state.display.workArea;
+    const height = work && work.height ? work.height : 800;
+    return Math.max(220, Math.floor(height - 24));
+  }
+
+  function axisOverflow() {
+    return {
+      x: bar.scrollWidth - bar.clientWidth,
+      y: bar.scrollHeight - bar.clientHeight,
+    };
+  }
+
+  // A single column is used when it fits. Otherwise the stack wraps, then
+  // the strip grows until the last button (close) is inside the window.
+  function fitVertical() {
+    resetBarBox();
+    const max = dockLimit();
+    const natural = bar.offsetHeight;
+    if (natural <= max) return;
+
+    const style = getComputedStyle(bar);
+    const padX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+    const inner = Math.max(36, bar.clientWidth - padX);
+    const gap = 2;
+    let cols = Math.max(2, Math.ceil(natural / max));
+    bar.style.flexWrap = 'wrap';
+    for (let attempt = 0; attempt < 4; attempt++) {
+      let width = Math.ceil(padX + inner * cols + gap * (cols - 1));
+      let height = Math.min(max, Math.ceil(natural / cols));
+      for (let grow = 0; grow < 12; grow++) {
+        bar.style.width = `${width}px`;
+        bar.style.height = `${height}px`;
+        const extra = axisOverflow();
+        if (extra.x <= 1 && extra.y <= 1) return;
+        // A short strip wraps the last buttons into a clipped extra column.
+        // Give those buttons a row in the columns that are already visible.
+        if (height < max && (extra.y > 1 || extra.x > 1)) {
+          height = Math.min(max, height + Math.max(40, extra.y));
+          continue;
+        }
+        if (extra.x > 1) {
+          width += extra.x;
+          continue;
+        }
+        break;
+      }
+      cols += 1;
+    }
   }
 
   function scheduleMeasure() {
     requestAnimationFrame(() => {
+      if (document.body.classList.contains('vertical')) fitVertical();
+      else resetBarBox();
       const rect = bar.getBoundingClientRect();
       const width = Math.ceil(rect.width);
       const height = Math.ceil(rect.height);
